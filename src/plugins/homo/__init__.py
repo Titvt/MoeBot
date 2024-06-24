@@ -1,13 +1,12 @@
 import re
+from re import Match
 
 from nonebot import on_command
-from nonebot.adapters import Message
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from nonebot.params import CommandArg
-from nonebot.plugin import PluginMetadata
+from nonebot.rule import is_type
 
-PLUGIN_NAME = "homo"
-__plugin_meta__ = PluginMetadata(PLUGIN_NAME, PLUGIN_NAME, PLUGIN_NAME)
-cmd_prove = on_command("论证")
+cmd_prove = on_command("论证", is_type(GroupMessageEvent))
 
 
 @cmd_prove.handle()
@@ -23,14 +22,13 @@ async def fn_prove(args: Message = CommandArg()):
         expr = homo(num)
 
         if len(expr) > 256:
-            msg = "答案太长咯，注意力不够用了>_<"
+            await cmd_prove.send("答案太长咯，注意力不够用了>_<")
         else:
-            msg = f"注意到 {num} = {homo(num)}，所以这是一个恶臭的数字，论证完毕！"
-
+            await cmd_prove.send(
+                f"注意到 {num} = {expr}，所以这是一个恶臭的数字，论证完毕！"
+            )
     except:
-        msg = "这么恶臭的数字有必要论证吗？"
-
-    await cmd_prove.finish(msg)
+        await cmd_prove.send("这么恶臭的数字有必要论证吗？")
 
 
 NUMS = {
@@ -595,7 +593,7 @@ def homo(num: int) -> str:
 
         return r
 
-    def repl(m: re.Match[str]) -> str:
+    def repl(m: Match[str]) -> str:
         g = m.group()
 
         if g.isdigit() and "114514114514".find(g) == -1:
