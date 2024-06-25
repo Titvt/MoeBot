@@ -6,15 +6,13 @@ from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from nonebot.params import CommandArg
 from nonebot.rule import is_type
 
-cmd_prove = on_command("论证", is_type(GroupMessageEvent))
+cmd_prove = on_command("论证", is_type(GroupMessageEvent), force_whitespace=True)
 
 
 @cmd_prove.handle()
 async def fn_prove(args: Message = CommandArg()):
-    arg = args.extract_plain_text()
-
     try:
-        num = int(arg)
+        num = int(args.extract_plain_text())
 
         if num == 114514:
             raise Exception
@@ -597,8 +595,7 @@ def homo(num: int) -> str:
         g = m.group()
 
         if g.isdigit() and "114514114514".find(g) == -1:
-            i = int(g)
-            return NUMS[i] if i in NUMS else g
+            return NUMS[int(g)] if int(g) in NUMS else g
         else:
             return NUMS[g] if g in NUMS else g
 
