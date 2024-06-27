@@ -212,4 +212,4 @@ async def sub_alias(tokens: list[MessageSegment]):
             continue
 
         insert_alias(qq, alias)
-        await cmd_control.send(f"设置成功！")
+        await cmd_control.send("设置成功！")
