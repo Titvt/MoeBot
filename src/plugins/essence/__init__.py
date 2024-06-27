@@ -78,11 +78,6 @@ def parse_message(msg: Message) -> list[MessageSegment]:
 
 
 async def get_name(bot: Bot, group_id: int, user_id: int) -> str:
-    data = select_alias(user_id)
-
-    if data != []:
-        return random.choice(data)[2]
-
     try:
         info = await bot.get_group_member_info(group_id=group_id, user_id=user_id)
         return info["card"] if info["card"] != "" else info["nickname"]
@@ -142,9 +137,14 @@ async def fn_show(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg
             return
 
         _, qq, essence = random.choice(data)
-        await cmd_show.send(
-            f"{await get_name(bot,event.group_id,qq)}：\n" + Message(essence)
-        )
+        data = select_alias(qq)
+
+        if data != []:
+            name = random.choice(data)[2]
+        else:
+            name = await get_name(bot, event.group_id, qq)
+
+        await cmd_show.send(f"{name}：\n" + Message(essence))
         return
 
     for i in parse_message(args):
