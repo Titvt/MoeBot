@@ -78,22 +78,11 @@ def parse_message(msg: Message) -> list[MessageSegment]:
 
 
 async def get_name(bot: Bot, group_id: int, user_id: int) -> str:
-    info = await bot.get_group_member_info(group_id=group_id, user_id=user_id)
-    return info["card"] if info["card"] != "" else info["nickname"]
-
-
-async def format_essence(
-    bot: Bot, group_id: int, user_id: int, essence: str
-) -> Message:
-    msg = Message(f"{await get_name(bot,group_id,user_id)}：\n")
-
-    for i in Message(essence):
-        if i.type == "at":
-            msg += f"@{await get_name(bot,group_id,i.data['qq'])}"
-        else:
-            msg += i
-
-    return msg
+    try:
+        info = await bot.get_group_member_info(group_id=group_id, user_id=user_id)
+        return info["card"] if info["card"] != "" else info["nickname"]
+    except:
+        return str(user_id)
 
 
 async def rule_group(event: GroupMessageEvent) -> bool:
@@ -110,11 +99,21 @@ cmd_add = on_command(
 
 
 @cmd_add.handle()
-async def fn_add(event: GroupMessageEvent):
+async def fn_add(bot: Bot, event: GroupMessageEvent):
     if event.reply is None or event.reply.sender.user_id is None:
         return
 
-    essence = "".join([str(i) for i in event.reply.message])
+    essence = ""
+
+    for i in event.reply.message:
+        if i.type in ["text", "face"]:
+            essence += str(i)
+        elif i.type == "at":
+            essence += f"@{await get_name(bot,event.group_id,i.data['qq'])}"
+
+    if essence == "":
+        return
+
     data = select_essence(event.reply.sender.user_id, essence)
 
     if data != []:
@@ -138,7 +137,9 @@ async def fn_show(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg
             return
 
         _, qq, essence = random.choice(data)
-        await cmd_show.send(await format_essence(bot, event.group_id, qq, essence))
+        await cmd_show.send(
+            f"{await get_name(bot,event.group_id,qq)}：\n" + Message(essence)
+        )
         return
 
     for i in parse_message(args):
@@ -160,11 +161,11 @@ async def fn_show(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg
             continue
 
         _, qq, essence = random.choice(data)
-        await cmd_show.send(await format_essence(bot, event.group_id, qq, essence))
+        await cmd_show.send(Message(essence))
 
 
 cmd_control = on_command(
-    "设精控制", is_type(GroupMessageEvent) & rule_group, force_whitespace=True
+    "设精管理", is_type(GroupMessageEvent) & rule_group, force_whitespace=True
 )
 
 
@@ -206,4 +207,4 @@ async def sub_alias(tokens: list[MessageSegment]):
             continue
 
         insert_alias(qq, alias)
-        await cmd_control.send(f"设置{alias}成功！")
+        await cmd_control.send(f"设置成功！")
