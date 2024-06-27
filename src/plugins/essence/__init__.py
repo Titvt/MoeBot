@@ -78,6 +78,11 @@ def parse_message(msg: Message) -> list[MessageSegment]:
 
 
 async def get_name(bot: Bot, group_id: int, user_id: int) -> str:
+    data = select_alias(user_id)
+
+    if data != []:
+        return random.choice(data)[2]
+
     try:
         info = await bot.get_group_member_info(group_id=group_id, user_id=user_id)
         return info["card"] if info["card"] != "" else info["nickname"]
