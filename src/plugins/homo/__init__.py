@@ -1,5 +1,4 @@
-import re
-from re import Match
+from re import Match, sub
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
@@ -561,7 +560,7 @@ def homo(num: int) -> str:
             if not s.isdigit():
                 s = f"({s})"
 
-            return re.sub(r"\*\(1\)", "", f"(X)*{s}")
+            return sub(r"\*\(1\)", "", f"(X)*{s}")
 
         if n in NUMS:
             return NUMS[n]
@@ -599,4 +598,4 @@ def homo(num: int) -> str:
         else:
             return NUMS[g] if g in NUMS else g
 
-    return re.sub(r"\d+|X", repl, solve(num))
+    return sub(r"\d+|X", repl, solve(num))

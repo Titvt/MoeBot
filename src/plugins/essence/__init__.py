@@ -1,14 +1,13 @@
-import random
-import sqlite3
+from random import choice
+from sqlite3 import connect
 
-import nonebot
-from nonebot import on_command
+from nonebot import get_driver, on_command
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageSegment
 from nonebot.params import CommandArg
 from nonebot.rule import is_type
 
-config = nonebot.get_driver().config
-db = sqlite3.connect("essence.db")
+config = get_driver().config
+db = connect("essence.db")
 db.execute(
     "CREATE TABLE IF NOT EXISTS essences (id INTEGER PRIMARY KEY AUTOINCREMENT, qq INTEGER, essence TEXT)"
 )
@@ -136,11 +135,11 @@ async def fn_show(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg
         if data == []:
             return
 
-        _, qq, essence = random.choice(data)
+        _, qq, essence = choice(data)
         data = select_alias(qq)
 
         if data != []:
-            name = random.choice(data)[2]
+            name = choice(data)[2]
         else:
             name = await get_name(bot, event.group_id, qq)
 
@@ -165,7 +164,7 @@ async def fn_show(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg
         if data == []:
             continue
 
-        _, qq, essence = random.choice(data)
+        _, qq, essence = choice(data)
         await cmd_show.send(Message(essence))
 
 
