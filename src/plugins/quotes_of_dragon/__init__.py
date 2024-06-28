@@ -1,6 +1,7 @@
 from random import choice
 from sqlite3 import connect
 
+import numpy as np
 from jieba import cut
 from nonebot import get_driver, on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
@@ -28,8 +29,14 @@ def get_quote(text: str) -> str:
         return choice(quotes)
 
     v = TfidfVectorizer().fit_transform([" ".join(cut(i)) for i in [text] + quotes])
-    s = cosine_similarity(v[0], v[1:])[0]
-    return choice(quotes) if max(s) < 0.01 else quotes[s.tolist().index(max(s))]
+    s = cosine_similarity(v[0], v[1:])[0].flatten()
+
+    if max(s) < 0.01:
+        return choice(quotes)
+
+    i = np.where(s >= 0.01)[0]
+    j = s[i]
+    return quotes[np.random.choice(i, p=j / np.sum(j))]
 
 
 async def rule_group(event: GroupMessageEvent) -> bool:
