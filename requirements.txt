@@ -1,0 +1,6 @@
+jieba
+nonebot-adapter-onebot
+nonebot2
+numpy
+scikit_learn
+websockets
