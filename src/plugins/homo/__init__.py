@@ -1,31 +1,93 @@
+import math
+from multiprocessing import Process, Queue
 from re import Match, sub
+from unicodedata import normalize
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from nonebot.params import CommandArg
 from nonebot.rule import is_type
 
+
+def subprocess(expr: str, queue: Queue):
+    try:
+        expr = normalize("NFKC", expr)
+
+        if "__" in expr:
+            raise Exception
+
+        num = eval(
+            expr,
+            {
+                "__builtins__": None,
+                "abs": abs,
+                "divmod": divmod,
+                "max": max,
+                "min": min,
+                "pow": pow,
+                "round": round,
+                "sum": sum,
+            },
+            {k: v for k, v in math.__dict__.items() if "_" not in k and k != "pow"},
+        )
+
+        if isinstance(num, int):
+            queue.put(num)
+        elif isinstance(num, float):
+            if not math.isfinite(num):
+                raise Exception
+
+            num = round(num, 2)
+
+            if num.is_integer():
+                queue.put(int(num))
+            else:
+                queue.put(num)
+        else:
+            raise Exception
+    except:
+        queue.put(114514)
+
+
+def sandbox_eval(expr: str) -> int | float:
+    queue = Queue()
+    process = Process(target=subprocess, args=(expr, queue))
+    process.start()
+    process.join(1)
+
+    if process.is_alive():
+        process.terminate()
+        process.join()
+        return 114514
+
+    return queue.get()
+
+
 cmd_prove = on_command("论证", is_type(GroupMessageEvent), force_whitespace=True)
 
 
 @cmd_prove.handle()
 async def fn_prove(args: Message = CommandArg()):
-    try:
-        num = int(args.extract_plain_text())
+    expr = args.extract_plain_text()
 
-        if num == 114514:
-            raise Exception
+    if len(expr) > 256:
+        await cmd_prove.send("这么长一串，不用看都知道这一定是一个恶臭的数字吧！")
+        return
 
-        expr = homo(num)
+    num = sandbox_eval(expr)
 
-        if len(expr) > 256:
-            await cmd_prove.send("答案太长咯，注意力不够用了>_<")
-        else:
-            await cmd_prove.send(
-                f"注意到 {num} = {expr}，所以这是一个恶臭的数字，论证完毕！"
-            )
-    except:
+    if num == 114514:
         await cmd_prove.send("这么恶臭的数字有必要论证吗？")
+        return
+
+    result = homo(num)
+
+    if len(result) > 256:
+        await cmd_prove.send("答案太长咯，注意力不够用了>_<")
+    else:
+        await cmd_prove.send(
+            f"注意到 {expr} = {num} = {result}，所以这是一个恶臭的数字，论证完毕！"
+        )
 
 
 NUMS = {
@@ -552,15 +614,35 @@ NUMS = {
 }
 
 
-def homo(num: int) -> str:
-    def solve(n: int) -> str:
+def homo(num: int | float) -> str:
+    def solve(n: int | float) -> str:
         if n < 0:
             s = solve(-n)
 
-            if not s.isdigit():
+            if not s.isdigit() and "/(10)" not in s and "/(100)" not in s:
                 s = f"({s})"
 
             return sub(r"\*\(1\)", "", f"(X)*{s}")
+
+        if isinstance(n, float):
+            if n.is_integer():
+                n = int(n)
+            elif (n * 10).is_integer():
+                s = solve(int(n * 10))
+
+                if not s.isdigit():
+                    s = f"({s})"
+
+                return f"{s}/(10)"
+            elif (n * 100).is_integer():
+                s = solve(int(n * 100))
+
+                if not s.isdigit():
+                    s = f"({s})"
+
+                return f"{s}/(100)"
+            else:
+                raise Exception
 
         if n in NUMS:
             return NUMS[n]
