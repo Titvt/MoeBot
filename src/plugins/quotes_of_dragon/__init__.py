@@ -39,13 +39,7 @@ def get_quote(text: str) -> str:
     return quotes[np.random.choice(i, p=j / np.sum(j))]
 
 
-async def rule_group(event: GroupMessageEvent) -> bool:
-    return event.group_id in config.groups
-
-
-cmd_quote = on_command(
-    "龙语", is_type(GroupMessageEvent) & rule_group, force_whitespace=True
-)
+cmd_quote = on_command("龙语", is_type(GroupMessageEvent), force_whitespace=True)
 
 
 @cmd_quote.handle()
