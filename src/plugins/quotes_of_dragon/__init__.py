@@ -43,10 +43,6 @@ async def rule_group(event: GroupMessageEvent) -> bool:
     return event.group_id in config.groups
 
 
-async def rule_admin(event: GroupMessageEvent) -> bool:
-    return event.user_id in config.admins
-
-
 cmd_quote = on_command(
     "龙语", is_type(GroupMessageEvent) & rule_group, force_whitespace=True
 )
