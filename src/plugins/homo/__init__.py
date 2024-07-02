@@ -76,7 +76,7 @@ async def fn_prove(args: Message = CommandArg()):
 
     num = sandbox_eval(expr)
 
-    if num == 114514:
+    if num == 114514 or -1 << 256 < num < 1 << 256:
         await cmd_prove.send("这么恶臭的数字有必要论证吗？")
         return
 
