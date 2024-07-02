@@ -5,7 +5,6 @@ WORKDIR /root
 COPY . .
 
 RUN python -m pip install pipx && \
-    python -m pipx ensurepath && \
     pipx install nb-cli && \
     pip install -r requirements.txt
 
