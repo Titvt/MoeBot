@@ -1,14 +1,23 @@
 import math
 from multiprocessing import Process, Queue
+from time import time
 from unicodedata import normalize
 
-from nonebot import on_command
+from nonebot import get_driver, on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from nonebot.params import CommandArg
 from nonebot.rule import is_type
+from openai import OpenAI
+
+config = get_driver().config
+avail_prove = 0
+chat_client = OpenAI(
+    api_key=config.api_key,
+    base_url=config.base_url,
+)
 
 
-def subprocess(expr: str, queue: Queue):
+def sandbox_eval_target(expr: str, queue: Queue):
     try:
         expr = normalize("NFKC", expr)
 
@@ -50,7 +59,7 @@ def subprocess(expr: str, queue: Queue):
 
 def sandbox_eval(expr: str) -> int | float:
     queue = Queue()
-    process = Process(target=subprocess, args=(expr, queue))
+    process = Process(target=sandbox_eval_target, args=(expr, queue))
     process.start()
     process.join(1)
 
@@ -62,18 +71,87 @@ def sandbox_eval(expr: str) -> int | float:
     return queue.get()
 
 
+def chat_expression_target(prompt: str, queue: Queue):
+    queue.put(
+        chat_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "你是一个负责将文本转换为合法的Python数学表达式的程序，表达式中可以使用math库中的函数和常量，当转换失败时始终返回表达式：114514",
+                },
+                {
+                    "role": "user",
+                    "content": "半径为5的球的体积",
+                },
+                {
+                    "role": "assistant",
+                    "content": "4/3*pi*5**3",
+                },
+                {
+                    "role": "user",
+                    "content": "一天有多少秒",
+                },
+                {
+                    "role": "assistant",
+                    "content": "60*60*24",
+                },
+                {
+                    "role": "user",
+                    "content": "10！",
+                },
+                {
+                    "role": "assistant",
+                    "content": "factorial(10)",
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            temperature=0,
+        )
+        .choices[0]
+        .message.content
+    )
+
+
+def chat_expression(prompt: str) -> str:
+    queue = Queue()
+    process = Process(target=chat_expression_target, args=(prompt, queue))
+    process.start()
+    process.join(10)
+
+    if process.is_alive():
+        process.terminate()
+        process.join()
+        return "114514"
+
+    return queue.get()
+
+
 cmd_prove = on_command("论证", is_type(GroupMessageEvent), force_whitespace=True)
 
 
 @cmd_prove.handle()
 async def fn_prove(args: Message = CommandArg()):
+    now = time()
+
+    if now < avail_prove:
+        await cmd_prove.send("休息一下吧，注意力不够用了>_<")
+        return
+
     expr = args.extract_plain_text()
 
-    if len(expr) > 256:
+    if len(expr) > 64:
         await cmd_prove.send("这么长一串，不用看都知道这一定是一个恶臭的数字吧！")
         return
 
     num = sandbox_eval(expr)
+
+    if num == 114514:
+        avail_prove = now + 10
+        num = sandbox_eval(chat_expression(expr))
 
     if num == 114514 or not -1 << 256 < num < 1 << 256:
         await cmd_prove.send("这么恶臭的数字有必要论证吗？")
@@ -83,6 +161,10 @@ async def fn_prove(args: Message = CommandArg()):
 
     if len(result) > 256:
         await cmd_prove.send("答案太长咯，注意力不够用了>_<")
+    elif expr == str(num):
+        await cmd_prove.send(
+            f"注意到 {expr} = {result}，所以这是一个恶臭的数字，论证完毕！"
+        )
     else:
         await cmd_prove.send(
             f"注意到 {expr} = {num} = {result}，所以这是一个恶臭的数字，论证完毕！"

@@ -3,14 +3,13 @@ from sqlite3 import connect
 
 import numpy as np
 from jieba import cut
-from nonebot import get_driver, on_command
+from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from nonebot.params import CommandArg
 from nonebot.rule import is_type
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-config = get_driver().config
 db = connect("quotes_of_dragon.db")
 db.execute(
     "CREATE TABLE IF NOT EXISTS quotes (id INTEGER PRIMARY KEY AUTOINCREMENT, quote TEXT)"

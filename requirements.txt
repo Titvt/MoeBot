@@ -2,5 +2,6 @@ jieba
 nonebot-adapter-onebot
 nonebot2
 numpy
+openai
 scikit_learn
 websockets
