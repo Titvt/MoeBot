@@ -135,6 +135,7 @@ cmd_prove = on_command("论证", is_type(GroupMessageEvent), force_whitespace=Tr
 
 @cmd_prove.handle()
 async def fn_prove(args: Message = CommandArg()):
+    global avail_prove
     now = time()
 
     if now < avail_prove:
