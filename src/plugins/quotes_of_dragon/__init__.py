@@ -28,7 +28,7 @@ def get_quote(text: str) -> str:
         return choice(quotes)
 
     v = TfidfVectorizer().fit_transform(
-        [" ".join(extract_tags(i, 65536)) for i in [text] + quotes]
+        [" ".join(extract_tags(i, None)) for i in [text] + quotes]
     )
     s = cosine_similarity(v[0], v[1:])[0].flatten()
 
