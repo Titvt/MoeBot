@@ -40,7 +40,9 @@ def get_quote(text: str) -> str:
     return quotes[np.random.choice(i, p=j / np.sum(j))]
 
 
-cmd_quote = on_command("龙语", is_type(GroupMessageEvent), force_whitespace=True)
+cmd_quote = on_command(
+    "龙语（已禁用）", is_type(GroupMessageEvent), force_whitespace=True
+)
 
 
 @cmd_quote.handle()

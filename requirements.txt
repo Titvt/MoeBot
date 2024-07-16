@@ -5,3 +5,4 @@ numpy
 openai
 scikit_learn
 websockets
+wordcloud
