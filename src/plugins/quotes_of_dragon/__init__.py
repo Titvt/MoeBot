@@ -2,7 +2,7 @@ from random import choice
 from sqlite3 import connect
 
 import numpy as np
-from jieba import cut
+from jieba.analyse import extract_tags
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message
 from nonebot.params import CommandArg
@@ -27,7 +27,9 @@ def get_quote(text: str) -> str:
     if text == "":
         return choice(quotes)
 
-    v = TfidfVectorizer().fit_transform([" ".join(cut(i)) for i in [text] + quotes])
+    v = TfidfVectorizer().fit_transform(
+        [" ".join(extract_tags(i, 65536)) for i in [text] + quotes]
+    )
     s = cosine_similarity(v[0], v[1:])[0].flatten()
 
     if max(s) < 0.01:
