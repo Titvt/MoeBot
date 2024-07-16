@@ -99,7 +99,5 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     )
     cloud.generate_from_frequencies(frequencies)
     cloud.to_file("word_cloud.png")
-    await cmd_cloud.send(
-        MessageSegment.image(f"file:///{join(getcwd(),'word_cloud.png')}")
-    )
+    await cmd_cloud.send(MessageSegment.image("file:///root/word_cloud.png"))
     remove("word_cloud.png")
