@@ -13,25 +13,27 @@ from wordcloud import WordCloud
 avail_cloud = 0
 db = connect("word_cloud.db")
 db.execute(
-    "CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, qq INTEGER, group INTEGER, message TEXT)"
+    "CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, qq INTEGER, group_id INTEGER, message TEXT)"
 )
 
 
-def insert_message(qq: int, group: int, message: str):
+def insert_message(qq: int, group_id: int, message: str):
     db.execute(
-        "INSERT INTO messages (qq, group, message) VALUES (?, ?, ?)",
-        (qq, group, message),
+        "INSERT INTO messages (qq, group_id, message) VALUES (?, ?, ?)",
+        (qq, group_id, message),
     )
     db.commit()
 
 
-def select_messages(qq: int, group: int) -> list[tuple[int, int, int, str]]:
+def select_messages(qq: int, group_id: int) -> list[tuple[int, int, int, str]]:
     cursor = db.cursor()
 
     if qq == 0:
-        cursor.execute("SELECT * FROM messages WHERE group = ?", (group,))
+        cursor.execute("SELECT * FROM messages WHERE group_id = ?", (group_id,))
     else:
-        cursor.execute("SELECT * FROM messages WHERE qq = ? AND group = ?", (qq, group))
+        cursor.execute(
+            "SELECT * FROM messages WHERE qq = ? AND group_id = ?", (qq, group_id)
+        )
 
     data = cursor.fetchall()
     cursor.close()
