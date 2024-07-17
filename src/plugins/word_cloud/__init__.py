@@ -51,7 +51,7 @@ async def fn_msg(event: GroupMessageEvent):
     insert_message(event.user_id, event.group_id, message)
 
 
-cmd_cloud = on_command("词云", is_type(GroupMessageEvent))
+cmd_cloud = on_command("词云", is_type(GroupMessageEvent), force_whitespace=True)
 
 
 @cmd_cloud.handle()
@@ -66,11 +66,11 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     avail_cloud = now + 10
 
     if len(args) == 0:
-        messages = select_messages(0, event.group_id)
+        messages = select_messages(event.user_id, event.group_id)
     elif args[0].type == "at":
         messages = select_messages(args[0].data["qq"], event.group_id)
-    elif args[0].type == "text" and args[0].data["text"].strip().isnumeric():
-        messages = select_messages(int(args[0].data["text"].strip()), event.group_id)
+    elif args[0].type == "text" and args[0].data["text"].strip().lower() == "all":
+        messages = select_messages(0, event.group_id)
     else:
         await cmd_cloud.send("不对！")
         return
