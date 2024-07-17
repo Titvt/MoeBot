@@ -10,7 +10,7 @@ from nonebot.rule import is_type
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-db = connect("quotes_of_dragon.db")
+db = connect("files/quotes_of_dragon.db")
 db.execute(
     "CREATE TABLE IF NOT EXISTS quotes (id INTEGER PRIMARY KEY AUTOINCREMENT, quote TEXT)"
 )

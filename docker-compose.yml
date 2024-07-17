@@ -1,6 +1,8 @@
 services:
-  moe_bot:
+  bot:
     build: .
-    image: moe_bot
+    image: bot
+    volumes:
+      - ./files:/root/files
     network_mode: "host"
-    container_name: moe_bot
+    container_name: bot

@@ -1,5 +1,3 @@
-from os import getcwd, remove
-from os.path import join
 from sqlite3 import connect
 from time import time
 
@@ -11,7 +9,7 @@ from nonebot.rule import is_type
 from wordcloud import WordCloud
 
 avail_cloud = 0
-db = connect("word_cloud.db")
+db = connect("files/word_cloud.db")
 db.execute(
     "CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, qq INTEGER, group_id INTEGER, message TEXT)"
 )
@@ -99,4 +97,6 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     )
     cloud.generate_from_frequencies(frequencies)
     cloud.to_file("word_cloud.png")
-    await cmd_cloud.send(MessageSegment.image(join(getcwd(), "word_cloud.png")))
+
+    with open("word_cloud.png", "rb") as f:
+        await cmd_cloud.send(MessageSegment.image(f.read()))
