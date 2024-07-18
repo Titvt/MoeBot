@@ -1,3 +1,4 @@
+import math
 from sqlite3 import connect
 from time import time
 
@@ -90,6 +91,9 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
                 frequencies[j] += 1
             else:
                 frequencies[j] = 1
+
+    for i in frequencies:
+        frequencies[i] = math.log(frequencies[i] + math.e - 1)
 
     cloud = WordCloud(
         "SmileySans-Oblique.ttf",
