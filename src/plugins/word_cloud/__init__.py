@@ -86,7 +86,34 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     frequencies = {}
 
     for i in messages:
-        for j in extract_tags(i[4], None):
+        for j in extract_tags(
+            i[4],
+            400,
+            allowPOS=(
+                "a",
+                "ad",
+                "an",
+                "b",
+                "e",
+                "eng",
+                "i",
+                "j",
+                "l",
+                "n",
+                "nr",
+                "nrfg",
+                "nrt",
+                "ns",
+                "nt",
+                "nz",
+                "o",
+                "q",
+                "v",
+                "vn",
+                "y",
+                "z",
+            ),
+        ):
             if j in frequencies:
                 frequencies[j] += 1
             else:
