@@ -61,10 +61,12 @@ cmd_cloud = on_command("词云", is_type(GroupMessageEvent), force_whitespace=Tr
 @cmd_cloud.handle()
 async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     global avail_cloud
+    msg = Message(MessageSegment.at(event.user_id))
     now = time()
 
     if now < avail_cloud:
-        await cmd_cloud.send("别急！")
+        msg += "别急！"
+        await cmd_cloud.send(msg)
         return
 
     avail_cloud = now + 10
@@ -76,11 +78,13 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     elif args[0].type == "text" and args[0].data["text"].strip().lower() == "all":
         messages = select_messages(event.group_id)
     else:
-        await cmd_cloud.send("不对！")
+        msg += "不对！"
+        await cmd_cloud.send(msg)
         return
 
     if len(messages) < 40:
-        await cmd_cloud.send("太少！")
+        msg += "太少！"
+        await cmd_cloud.send(msg)
         return
 
     frequencies = {}
@@ -133,9 +137,7 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     )
     cloud.generate_from_frequencies(frequencies)
     cloud.to_file("word_cloud.png")
-    msg = Message()
-    msg += MessageSegment.at(event.user_id)
-    msg += MessageSegment.image(f.read())
 
     with open("word_cloud.png", "rb") as f:
+        msg += MessageSegment.image(f.read())
         await cmd_cloud.send(msg)
