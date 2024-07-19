@@ -133,6 +133,9 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     )
     cloud.generate_from_frequencies(frequencies)
     cloud.to_file("word_cloud.png")
+    msg = Message()
+    msg += MessageSegment.at(event.user_id)
+    msg += MessageSegment.image(f.read())
 
     with open("word_cloud.png", "rb") as f:
-        await cmd_cloud.send(MessageSegment.image(f.read()))
+        await cmd_cloud.send(msg)
