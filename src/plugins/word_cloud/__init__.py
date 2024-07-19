@@ -129,6 +129,7 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
         prefer_horizontal=1,
         max_words=400,
         background_color="white",
+        max_font_size=180,
     )
     cloud.generate_from_frequencies(frequencies)
     cloud.to_file("word_cloud.png")
