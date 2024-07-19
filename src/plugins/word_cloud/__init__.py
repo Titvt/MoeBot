@@ -120,7 +120,7 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
                 frequencies[j] = 1
 
     for i in frequencies:
-        frequencies[i] = math.tanh(frequencies[i] / 40)
+        frequencies[i] = math.log(frequencies[i] + math.e - 1)
 
     cloud = WordCloud(
         "SmileySans-Oblique.ttf",
