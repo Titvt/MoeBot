@@ -1,4 +1,2 @@
-docker-compose down && \
-docker rmi bot && \
-docker-compose build && \
+docker-compose down
 docker-compose up -d
