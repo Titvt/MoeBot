@@ -5,7 +5,7 @@ from time import time
 import matplotlib.pyplot as plt
 import pandas as pd
 from jieba.analyse import extract_tags
-from matplotlib.dates import DateFormatter
+from matplotlib.dates import MO, DateFormatter, WeekdayLocator
 from nonebot import on_command, on_message
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, MessageSegment
 from nonebot.params import CommandArg
@@ -194,7 +194,9 @@ async def fn_statistics(event: GroupMessageEvent, args: Message = CommandArg()):
     data = data.groupby(data["time"].dt.date).size()
     plt.figure(figsize=(16, 9), dpi=80)
     lineplot(data, marker="o")
-    plt.gca().xaxis.set_major_formatter(DateFormatter("%m.%d"))
+    axis = plt.gca()
+    axis.xaxis.set_major_formatter(DateFormatter("%m.%d"))
+    axis.xaxis.set_major_locator(WeekdayLocator(MO, 1))
     plt.xlabel("")
     plt.grid(True)
     plt.tight_layout()
