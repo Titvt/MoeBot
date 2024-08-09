@@ -1,8 +1,11 @@
 jieba
+matplotlib
 nonebot-adapter-onebot
 nonebot2
 numpy
 openai
+pandas
 scikit_learn
+seaborn
 websockets
 wordcloud

@@ -2,14 +2,19 @@ import math
 from sqlite3 import connect
 from time import time
 
+import matplotlib.pyplot as plt
+import pandas as pd
 from jieba.analyse import extract_tags
+from matplotlib.dates import DateFormatter
 from nonebot import on_command, on_message
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, MessageSegment
 from nonebot.params import CommandArg
 from nonebot.rule import is_type
+from seaborn import lineplot
 from wordcloud import WordCloud
 
 avail_cloud = 0
+avail_statistics = 0
 db = connect("files/word_cloud.db")
 db.execute(
     "CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP, group_id INTEGER, user_id INTEGER, message TEXT)"
@@ -142,3 +147,60 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     with open("word_cloud.png", "rb") as f:
         msg += MessageSegment.image(f.read())
         await cmd_cloud.send(msg)
+
+
+cmd_statistics = on_command(
+    "发言统计", is_type(GroupMessageEvent), force_whitespace=True
+)
+
+
+@cmd_statistics.handle()
+async def fn_statistics(event: GroupMessageEvent, args: Message = CommandArg()):
+    global avail_statistics
+    msg = Message(MessageSegment.at(event.user_id))
+    msg += " "
+    now = time()
+
+    if now < avail_statistics:
+        msg += "别急！"
+        await cmd_statistics.send(msg)
+        return
+
+    avail_statistics = now + 10
+
+    if len(args) == 0:
+        user_id = event.user_id
+    elif args[0].type == "at":
+        user_id = args[0].data["qq"]
+    elif args[0].type == "text" and args[0].data["text"].strip().lower() == "all":
+        user_id = 0
+    else:
+        msg += "不对！"
+        await cmd_statistics.send(msg)
+        return
+
+    if user_id == 0:
+        data = pd.read_sql_query(
+            "SELECT time FROM messages WHERE group_id = ?", db, params=(event.group_id,)
+        )
+    else:
+        data = pd.read_sql_query(
+            "SELECT time FROM messages WHERE group_id = ? AND user_id = ?",
+            db,
+            params=(event.group_id, user_id),
+        )
+
+    data["time"] = pd.to_datetime(data["time"], unit="s")
+    data = data.groupby(data["time"].dt.date).size()
+    plt.figure(figsize=(16, 9), dpi=80)
+    lineplot(data, marker="o")
+    plt.gca().xaxis.set_major_formatter(DateFormatter("%m.%d"))
+    plt.xlabel("")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("statistics.png", dpi=80)
+    plt.close()
+
+    with open("statistics.png", "rb") as f:
+        msg += MessageSegment.image(f.read())
+        await cmd_statistics.send(msg)
