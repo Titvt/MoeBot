@@ -62,6 +62,7 @@ cmd_cloud = on_command("词云", is_type(GroupMessageEvent), force_whitespace=Tr
 async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     global avail_cloud
     msg = Message(MessageSegment.at(event.user_id))
+    msg += " "
     now = time()
 
     if now < avail_cloud:
