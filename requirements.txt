@@ -1,4 +1,5 @@
 jieba
+lxml
 matplotlib
 nonebot-adapter-onebot
 nonebot2
