@@ -77,8 +77,8 @@ async def fn_msg(event: GroupMessageEvent):
 
     title, content, unknown_tags = parse_v2ex(message)
 
-    if len(content) > 1024:
-        content = f"{content[:1024]}\n\n..."
+    if len(content) > 256:
+        content = f"{content[:256]}\n\n..."
 
     message = f"标题：\n{title}\n\n内容：\n{content}"
 
