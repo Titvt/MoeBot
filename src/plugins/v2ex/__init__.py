@@ -26,7 +26,7 @@ def parse_element(element: HtmlElement, unknown_tags: set) -> str:
             return "[图片]"
         case "li":
             return f"• {content}\n"
-        case "code" | "p":
+        case "br" | "code" | "p":
             return f"{content}\n"
         case _:
             unknown_tags.add(element.tag)
