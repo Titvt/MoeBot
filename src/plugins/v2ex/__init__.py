@@ -20,7 +20,19 @@ def parse_element(element: HtmlElement, unknown_tags: set) -> str:
         content += f"{parse_element(i, unknown_tags)}{(i.tail or '').strip()}"
 
     match element.tag:
-        case "a" | "div" | "h2" | "h3" | "h4" | "h5" | "h6" | "ol" | "pre" | "ul":
+        case (
+            "a"
+            | "div"
+            | "h2"
+            | "h3"
+            | "h4"
+            | "h5"
+            | "h6"
+            | "ol"
+            | "pre"
+            | "strong"
+            | "ul"
+        ):
             return content
         case "img":
             return "[图片]"
