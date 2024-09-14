@@ -72,7 +72,7 @@ def legal_check(content: str) -> bool:
             temperature=0,
         )
         .choices[0]
-        .message.content
+        .message.content.splitlines()[-1]
         == "<false>"
     )
 
