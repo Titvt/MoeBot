@@ -6,6 +6,7 @@ nonebot2
 numpy
 openai
 pandas
+requests
 scikit_learn
 seaborn
 websockets
