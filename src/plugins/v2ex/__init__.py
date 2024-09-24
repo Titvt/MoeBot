@@ -48,11 +48,11 @@ def parse_element(element: HtmlElement, unknown_tags: set) -> str:
 def parse_v2ex(url: str) -> tuple[str, str, set[str]]:
     response = get(url)
     tree = html.fromstring(response.text)
-    title = tree.xpath("//h1/text()")[0]
-    body = tree.xpath("//div[@class='topic_content']")[0]
+    title = tree.xpath("//h1/text()")
+    body = tree.xpath("//div[@class='topic_content']")
     unknown_tags = set()
-    content = parse_element(body, unknown_tags)
-    return title, content, unknown_tags
+    content = parse_element(body[0], unknown_tags) if body else ""
+    return title[0] if title else "", content, unknown_tags
 
 
 def legal_check(content: str) -> bool:
