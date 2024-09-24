@@ -58,7 +58,7 @@ def parse_v2ex(url: str) -> tuple[str, str, set[str]]:
 def legal_check(content: str) -> bool:
     return (
         chat_client.chat.completions.create(
-            model="gpt-4o",
+            model=config.model,
             messages=[
                 {
                     "role": "system",

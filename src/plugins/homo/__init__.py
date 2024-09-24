@@ -74,7 +74,7 @@ def sandbox_eval(expr: str) -> int | float:
 def chat_expression_target(prompt: str, queue: Queue):
     queue.put(
         chat_client.chat.completions.create(
-            model="gpt-4o",
+            model=config.model,
             messages=[
                 {
                     "role": "system",
