@@ -21,7 +21,7 @@ def request_chat(prompt: str) -> str:
             messages=[
                 {
                     "role": "system",
-                    "content": "你是一个基于大语言模型的聊天群机器人助手，你在回复时会始终避免使用不利于人类阅读的元素，例如 **加粗文本** 或者 ```代码块```\n你不会回复涉及中华人民共和国政治敏感内容，或者涉及色情、赌博、毒品、暴力、恐怖主义等违法违规内容",
+                    "content": config.system_prompt,
                 },
                 {
                     "role": "user",
