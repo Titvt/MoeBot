@@ -1,8 +1,6 @@
 from nonebot import get_bot
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, MessageSegment
 
-bot = get_bot()
-
 
 async def send(
     event: GroupMessageEvent,
@@ -15,4 +13,4 @@ async def send(
         else Message(message)
     )
 
-    await bot.send(event, msg)
+    await get_bot().send(event, msg)
