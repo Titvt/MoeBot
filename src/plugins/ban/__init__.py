@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message
 from nonebot.params import CommandArg
 from nonebot.rule import is_type
 
-from bus import send
+from src.bus import send
 
 BAN_CACHE: dict[int, list[str]] = {}
 

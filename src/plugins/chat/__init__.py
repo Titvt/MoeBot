@@ -6,7 +6,7 @@ from nonebot.params import CommandArg
 from nonebot.rule import is_type
 from openai import OpenAI
 
-from bus import send
+from src.bus import send
 
 AVAIL_CHAT: float = 0
 

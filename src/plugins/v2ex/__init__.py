@@ -6,7 +6,7 @@ from nonebot.rule import is_type
 from openai import OpenAI
 from requests import get
 
-from bus import send
+from src.bus import send
 
 config = get_driver().config
 chat_client = OpenAI(

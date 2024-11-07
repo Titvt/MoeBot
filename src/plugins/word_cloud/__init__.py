@@ -13,7 +13,7 @@ from nonebot.rule import is_type
 from seaborn import lineplot
 from wordcloud import WordCloud
 
-from bus import send
+from src.bus import send
 
 AVAIL_CLOUD: float = 0
 AVAIL_STATISTICS: float = 0
