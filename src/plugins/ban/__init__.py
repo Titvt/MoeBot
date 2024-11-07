@@ -136,6 +136,10 @@ cmd_list = on_command("违禁词列表", is_type(GroupMessageEvent))
 
 @cmd_list.handle()
 async def fn_list(event: GroupMessageEvent):
+    if event.user_id not in config.ban_admin:
+        await cmd_add.send("无权限！")
+        return
+
     if event.group_id not in ban_cache:
         ban_cache[event.group_id] = select_bans(event.group_id)
 
