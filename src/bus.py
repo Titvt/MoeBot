@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, MessageSegme
 async def send(
     event: GroupMessageEvent,
     message: str | Message | MessageSegment,
-    reply: bool = False,
+    reply: bool = True,
 ):
     msg = (
         Message(MessageSegment.reply(event.message_id)) + message
