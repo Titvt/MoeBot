@@ -6,6 +6,8 @@ from nonebot.rule import is_type
 from openai import OpenAI
 from requests import get
 
+from bus import send
+
 config = get_driver().config
 chat_client = OpenAI(
     api_key=config.api_key,
@@ -56,7 +58,7 @@ def parse_v2ex(url: str) -> tuple[str, str, set[str]]:
 
 
 def legal_check(content: str) -> bool:
-    return (
+    response = (
         chat_client.chat.completions.create(
             model=config.model,
             messages=[
@@ -72,9 +74,13 @@ def legal_check(content: str) -> bool:
             temperature=0,
         )
         .choices[0]
-        .message.content.splitlines()[-1]
-        == "<false>"
+        .message.content
     )
+
+    if response is None:
+        return False
+
+    return response.splitlines()[-1] == "<false>"
 
 
 cmd_msg = on_message(is_type(GroupMessageEvent))
@@ -95,10 +101,10 @@ async def fn_msg(event: GroupMessageEvent):
     message = f"标题：\n{title}\n\n内容：\n{content}"
 
     if not legal_check(message):
-        await cmd_msg.send("该链接内容疑似违法违规，请勿点击！")
+        await send(event, "该链接内容疑似违法违规，请勿点击！")
         return
 
     if unknown_tags:
         message += f"\n\n发现未知标签，请联系管理员：\n{unknown_tags}"
 
-    await cmd_msg.send(message)
+    await send(event, message)

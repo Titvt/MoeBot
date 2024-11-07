@@ -9,8 +9,11 @@ from nonebot.params import CommandArg
 from nonebot.rule import is_type
 from openai import OpenAI
 
+from bus import send
+
+AVAIL_PROVE: float = 0
+
 config = get_driver().config
-avail_prove = 0
 chat_client = OpenAI(
     api_key=config.api_key,
     base_url=config.base_url,
@@ -134,41 +137,42 @@ cmd_prove = on_command("论证", is_type(GroupMessageEvent), force_whitespace=Tr
 
 
 @cmd_prove.handle()
-async def fn_prove(args: Message = CommandArg()):
-    global avail_prove
+async def fn_prove(event: GroupMessageEvent, args: Message = CommandArg()):
+    global AVAIL_PROVE
     now = time()
 
-    if now < avail_prove:
-        await cmd_prove.send("休息一下吧，注意力不够用了>_<")
+    if now < AVAIL_PROVE:
+        await send(event, "休息一下吧，注意力不够用了>_<")
         return
 
     expr = args.extract_plain_text()
 
     if len(expr) > 64:
-        await cmd_prove.send("这么长一串，不用看都知道这一定是一个恶臭的数字吧！")
+        await send(event, "这么长一串，不用看都知道这一定是一个恶臭的数字吧！")
         return
 
     num = sandbox_eval(expr)
 
     if num == 114514:
-        avail_prove = now + 10
+        AVAIL_PROVE = now + 10
         num = sandbox_eval(chat_expression(expr))
 
     if num == 114514 or not -1 << 256 < num < 1 << 256:
-        await cmd_prove.send("这么恶臭的数字有必要论证吗？")
+        await send(event, "这么恶臭的数字有必要论证吗？")
         return
 
     result = homo(num)
 
     if len(result) > 256:
-        await cmd_prove.send("答案太长咯，注意力不够用了>_<")
+        await send(event, "答案太长咯，注意力不够用了>_<")
     elif expr == str(num):
-        await cmd_prove.send(
-            f"注意到 {expr} = {result}，所以这是一个恶臭的数字，论证完毕！"
+        await send(
+            event, f"注意到 {expr} = {result}，所以这是一个恶臭的数字，论证完毕！"
         )
     else:
-        await cmd_prove.send(
-            f"注意到 {expr} = {num} = {result}，所以这是一个恶臭的数字，论证完毕！"
+        await send(
+            event,
+            f"注意到 {expr} = {num} = {result}，所以这是一个恶臭的数字，论证完毕！",
         )
 
 

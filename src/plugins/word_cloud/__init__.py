@@ -13,8 +13,11 @@ from nonebot.rule import is_type
 from seaborn import lineplot
 from wordcloud import WordCloud
 
-avail_cloud = 0
-avail_statistics = 0
+from bus import send
+
+AVAIL_CLOUD: float = 0
+AVAIL_STATISTICS: float = 0
+
 db = connect("files/word_cloud.db")
 db.execute(
     "CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP, group_id INTEGER, user_id INTEGER, message TEXT)"
@@ -65,17 +68,14 @@ cmd_cloud = on_command("词云", is_type(GroupMessageEvent), force_whitespace=Tr
 
 @cmd_cloud.handle()
 async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
-    global avail_cloud
-    msg = Message(MessageSegment.at(event.user_id))
-    msg += " "
+    global AVAIL_CLOUD
     now = time()
 
-    if now < avail_cloud:
-        msg += "别急！"
-        await cmd_cloud.send(msg)
+    if now < AVAIL_CLOUD:
+        await send(event, "别急！")
         return
 
-    avail_cloud = now + 10
+    AVAIL_CLOUD = now + 10
 
     if len(args) == 0:
         messages = select_messages(event.group_id, event.user_id)
@@ -84,13 +84,11 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     elif args[0].type == "text" and args[0].data["text"].strip().lower() == "all":
         messages = select_messages(event.group_id)
     else:
-        msg += "不对！"
-        await cmd_cloud.send(msg)
+        await send(event, "不对！")
         return
 
     if len(messages) < 40:
-        msg += "太少！"
-        await cmd_cloud.send(msg)
+        await send(event, "太少！")
         return
 
     frequencies = {}
@@ -145,8 +143,7 @@ async def fn_cloud(event: GroupMessageEvent, args: Message = CommandArg()):
     cloud.to_file("word_cloud.png")
 
     with open("word_cloud.png", "rb") as f:
-        msg += MessageSegment.image(f.read())
-        await cmd_cloud.send(msg)
+        await send(event, MessageSegment.image(f.read()))
 
 
 cmd_statistics = on_command(
@@ -156,17 +153,14 @@ cmd_statistics = on_command(
 
 @cmd_statistics.handle()
 async def fn_statistics(event: GroupMessageEvent, args: Message = CommandArg()):
-    global avail_statistics
-    msg = Message(MessageSegment.at(event.user_id))
-    msg += " "
+    global AVAIL_STATISTICS
     now = time()
 
-    if now < avail_statistics:
-        msg += "别急！"
-        await cmd_statistics.send(msg)
+    if now < AVAIL_STATISTICS:
+        await send(event, "别急！")
         return
 
-    avail_statistics = now + 10
+    AVAIL_STATISTICS = now + 10
 
     if len(args) == 0:
         user_id = event.user_id
@@ -175,8 +169,7 @@ async def fn_statistics(event: GroupMessageEvent, args: Message = CommandArg()):
     elif args[0].type == "text" and args[0].data["text"].strip().lower() == "all":
         user_id = 0
     else:
-        msg += "不对！"
-        await cmd_statistics.send(msg)
+        await send(event, "不对！")
         return
 
     if user_id == 0:
@@ -204,5 +197,4 @@ async def fn_statistics(event: GroupMessageEvent, args: Message = CommandArg()):
     plt.close()
 
     with open("statistics.png", "rb") as f:
-        msg += MessageSegment.image(f.read())
-        await cmd_statistics.send(msg)
+        await send(event, MessageSegment.image(f.read()))

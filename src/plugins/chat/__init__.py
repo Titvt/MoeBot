@@ -6,8 +6,11 @@ from nonebot.params import CommandArg
 from nonebot.rule import is_type
 from openai import OpenAI
 
+from bus import send
+
+AVAIL_CHAT: float = 0
+
 config = get_driver().config
-avail_chat = 0
 chat_client = OpenAI(
     api_key=config.api_key,
     base_url=config.base_url,
@@ -15,7 +18,7 @@ chat_client = OpenAI(
 
 
 def request_chat(prompt: str) -> str:
-    return (
+    response = (
         chat_client.chat.completions.create(
             model=config.model,
             messages=[
@@ -34,24 +37,26 @@ def request_chat(prompt: str) -> str:
         .message.content
     )
 
+    return response if response is not None else ""
+
 
 cmd_chat = on_command("聊天", is_type(GroupMessageEvent), force_whitespace=True)
 
 
 @cmd_chat.handle()
-async def fn_chat(args: Message = CommandArg()):
-    global avail_chat
+async def fn_chat(event: GroupMessageEvent, args: Message = CommandArg()):
+    global AVAIL_CHAT
     now = time()
 
-    if now < avail_chat:
-        await cmd_chat.send("别急！")
+    if now < AVAIL_CHAT:
+        await send(event, "别急！")
         return
 
     prompt = args.extract_plain_text().strip()
 
     if len(prompt) < 4:
-        await cmd_chat.send("太短！")
+        await send(event, "太短！")
         return
 
-    avail_chat = now + 10
-    await cmd_chat.send(request_chat(prompt))
+    AVAIL_CHAT = now + 10
+    await send(event, request_chat(prompt))
