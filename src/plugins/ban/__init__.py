@@ -17,11 +17,11 @@ async def fn_msg(bot: Bot, event: GroupMessageEvent):
 
     for ban in ban_map[event.group_id]:
         if ban in message:
-            bot.delete_msg(message_id=event.message_id)
-            bot.set_group_ban(
-                group_id=event.group_id, user_id=event.user_id, duration=60
+            await bot.delete_msg(message_id=event.message_id)
+            await bot.set_group_ban(
+                group_id=event.group_id, user_id=event.user_id, duration=300
             )
-            await cmd_msg.finish("你发送了违禁词，禁言！")
+            await cmd_msg.send("你发送了违禁词，禁言！")
             return
 
 
