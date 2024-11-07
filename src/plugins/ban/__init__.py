@@ -10,7 +10,11 @@ cmd_msg = on_message(is_type(GroupMessageEvent))
 
 @cmd_msg.handle()
 async def fn_msg(bot: Bot, event: GroupMessageEvent):
-    if event.group_id not in ban_map or len(ban_map[event.group_id]) == 0:
+    if (
+        event.user_id in config.ban_admin
+        or event.group_id not in ban_map
+        or len(ban_map[event.group_id]) == 0
+    ):
         return
 
     message = event.get_plaintext()
@@ -30,8 +34,6 @@ cmd_add = on_command("添加违禁词", is_type(GroupMessageEvent), force_whites
 
 @cmd_add.handle()
 async def fn_add(event: GroupMessageEvent, args: Message = CommandArg()):
-    global ban_map
-
     if event.user_id not in config.ban_admin:
         await cmd_add.send("无权限！")
         return
@@ -58,8 +60,6 @@ cmd_delete = on_command("删除违禁词", is_type(GroupMessageEvent), force_whi
 
 @cmd_delete.handle()
 async def fn_delete(event: GroupMessageEvent, args: Message = CommandArg()):
-    global ban_map
-
     if event.user_id not in config.ban_admin:
         await cmd_add.send("无权限！")
         return
@@ -83,8 +83,6 @@ cmd_list = on_command("违禁词列表", is_type(GroupMessageEvent))
 
 @cmd_list.handle()
 async def fn_list(event: GroupMessageEvent):
-    global ban_map
-
     if event.group_id not in ban_map or len(ban_map[event.group_id]) == 0:
         await cmd_list.send("无违禁词！")
         return
